@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Form Validation</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      transition:0.4s;
+      background:#0f172a;
+    }
+
+    
+    .bg{
+      position:fixed;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      z-index:-1;
+    }
+
+    .circle{
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,0.15);
+      animation:float 12s infinite linear;
+      backdrop-filter:blur(5px);
+    }
+
+    .circle:nth-child(1){
+      width:250px;
+      height:250px;
+      top:10%;
+      left:10%;
+      animation-duration:14s;
+    }
+
+    .circle:nth-child(2){
+      width:180px;
+      height:180px;
+      bottom:10%;
+      right:15%;
+      animation-duration:18s;
+    }
+
+    .circle:nth-child(3){
+      width:120px;
+      height:120px;
+      top:50%;
+      left:60%;
+      animation-duration:10s;
+    }
+
+    @keyframes float{
+      0%{
+        transform:translateY(0) rotate(0deg);
+      }
+      100%{
+        transform:translateY(-50px) rotate(360deg);
+      }
+    }
+
+    
+    .container{
+      width:90%;
+      max-width:420px;
+      padding:35px;
+      border-radius:25px;
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.2);
+      backdrop-filter:blur(18px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+      color:white;
+      animation:fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn{
+      from{
+        opacity:0;
+        transform:translateY(20px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    h2{
+      text-align:center;
+      margin-bottom:25px;
+      font-size:30px;
+    }
+
+    .theme-toggle{
+      position:absolute;
+      top:20px;
+      right:20px;
+      padding:10px 16px;
+      border:none;
+      border-radius:30px;
+      cursor:pointer;
+      font-weight:bold;
+      background:white;
+      color:#111;
+      transition:0.3s;
+    }
+
+    .theme-toggle:hover{
+      transform:scale(1.05);
+    }
+
+    .input-group{
+      margin-bottom:18px;
+      position:relative;
+    }
+
+    .input-group input{
+      width:100%;
+      padding:15px;
+      border:none;
+      outline:none;
+      border-radius:12px;
+      font-size:16px;
+      background:rgba(255,255,255,0.2);
+      color:white;
+      transition:0.3s;
+    }
+
+    .input-group input::placeholder{
+      color:#ddd;
+    }
+
+    .input-group input:focus{
+      transform:scale(1.02);
+      box-shadow:0 0 12px rgba(255,255,255,0.4);
+    }
+
+    
+    .toggle-password{
+      position:absolute;
+      right:15px;
+      top:50%;
+      transform:translateY(-50%);
+      cursor:pointer;
+      font-size:14px;
+      color:#fff;
+      user-select:none;
+    }
+
+    .error{
+      display:none;
+      color:#ffb3b3;
+      margin-top:5px;
+      font-size:14px;
+    }
+
+    .success-message{
+      display:none;
+      text-align:center;
+      background:#00c853;
+      padding:12px;
+      border-radius:10px;
+      margin-top:15px;
+      animation:pop 0.5s ease;
+    }
+
+    @keyframes pop{
+      from{
+        transform:scale(0.7);
+        opacity:0;
+      }
+      to{
+        transform:scale(1);
+        opacity:1;
+      }
+    }
+
+    button.submit-btn{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      background:white;
+      color:#111827;
+      font-size:17px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button.submit-btn:hover{
+      transform:translateY(-3px);
+      background:#f3f4f6;
+    }
+
+    .valid{
+      border:2px solid #00ff88 !important;
+    }
+
+    .invalid{
+      border:2px solid #ff4d4d !important;
+    }
+
+    /* Light Mode */
+    body.light{
+      background:#f1f5f9;
+      color:#111;
+    }
+
+    body.light .container{
+      background:rgba(255,255,255,0.5);
+      color:#111;
+    }
+
+    body.light .input-group input{
+      background:rgba(255,255,255,0.7);
+      color:#111;
+    }
+
+    body.light .input-group input::placeholder{
+      color:#555;
+    }
+
+    body.light .toggle-password{
+      color:#111;
+    }
+
+    body.light .theme-toggle{
+      background:#111;
+      color:white;
+    }
+
+  </style>
+</head>
+<body>
+
+  
+  <div class="bg">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
+  
+  <button class="theme-toggle" id="themeBtn">
+    Light Mode
+  </button>
+
+  <!-- Form -->
+  <div class="container">
+
+    <h2>Register Form</h2>
+
+    <form id="myForm">
+
+      <div class="input-group">
+        <input type="text" id="name" placeholder="Enter Name">
+        <div class="error" id="nameError">
+          Name must be at least 3 characters
+        </div>
+      </div>
+
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Enter Email">
+        <div class="error" id="emailError">
+          Enter valid email
+        </div>
+      </div>
+
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Enter Password">
+        <span class="toggle-password" id="togglePassword">
+          Show
+        </span>
+
+        <div class="error" id="passwordError">
+          Password must be at least 6 characters
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        Submit
+      </button>
+
+      <div class="success-message" id="successMessage">
+        Form Submitted Successfully!
+      </div>
+
+    </form>
+
+  </div>
+
+  <script>
+
+    const form = document.getElementById("myForm");
+
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    const nameError = document.getElementById("nameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+
+    const successMessage = document.getElementById("successMessage");
+
+    
+    form.addEventListener("submit", function(e){
+
+      e.preventDefault();
+
+      let valid = true;
+
+      
+      if(nameInput.value.trim().length < 3){
+        showError(nameInput, nameError);
+        valid = false;
+      }else{
+        showSuccess(nameInput, nameError);
+      }
+
+      
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+      if(!emailInput.value.match(emailPattern)){
+        showError(emailInput, emailError);
+        valid = false;
+      }else{
+        showSuccess(emailInput, emailError);
+      }
+
+      
+      if(passwordInput.value.length < 6){
+        showError(passwordInput, passwordError);
+        valid = false;
+      }else{
+        showSuccess(passwordInput, passwordError);
+      }
+
+      
+      if(valid){
+        successMessage.style.display = "block";
+
+        setTimeout(() => {
+          successMessage.style.display = "none";
+          form.reset();
+
+          nameInput.classList.remove("valid");
+          emailInput.classList.remove("valid");
+          passwordInput.classList.remove("valid");
+
+        }, 3000);
+      }
+
+    });
+
+    function showError(input, error){
+      input.classList.add("invalid");
+      input.classList.remove("valid");
+      error.style.display = "block";
+    }
+
+    function showSuccess(input, error){
+      input.classList.remove("invalid");
+      input.classList.add("valid");
+      error.style.display = "none";
+    }
+
+    
+    const togglePassword = document.getElementById("togglePassword");
+
+    togglePassword.addEventListener("click", () => {
+
+      if(passwordInput.type === "password"){
+        passwordInput.type = "text";
+        togglePassword.innerText = "Hide";
+      }else{
+        passwordInput.type = "password";
+        togglePassword.innerText = "Show";
+      }
+
+    });
+
+    
+    const themeBtn = document.getElementById("themeBtn");
+
+    themeBtn.addEventListener("click", () => {
+
+      document.body.classList.toggle("light");
+
+      if(document.body.classList.contains("light")){
+        themeBtn.innerText = "Dark Mode";
+      }else{
+        themeBtn.innerText = "Light Mode";
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
